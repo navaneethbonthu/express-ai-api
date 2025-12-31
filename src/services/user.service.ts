@@ -8,7 +8,7 @@ const JWT_SECRET = "your-secret-key"; // TODO: use env var
 export class UserService {
   async getAllUsers(): Promise<UserWithoutPassword[]> {
     const users = await prisma.user.findMany();
-    return users.map(({ password, ...user }) => user);
+    return users.map(({ password, ...user }: User) => user);
   }
 
   async getUserById(id: string): Promise<UserWithoutPassword | null> {

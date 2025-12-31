@@ -19,4 +19,29 @@ export class ProductService {
       data: product,
     });
   }
+
+  async updateProduct(
+    id: string,
+    product: Partial<Omit<Product, "id" | "createdAt" | "updatedAt">>
+  ): Promise<Product | null> {
+    try {
+      return await prisma.product.update({
+        where: { id },
+        data: product,
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async deleteProduct(id: string): Promise<boolean> {
+    try {
+      await prisma.product.delete({
+        where: { id },
+      });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }
