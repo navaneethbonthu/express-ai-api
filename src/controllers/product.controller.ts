@@ -17,7 +17,7 @@ export class ProductController {
     next: NextFunction
   ): Promise<void> {
     try {
-      const products = await productService.getAllProducts();
+      const products = await productService.getAllProducts((req as any).userId);
       res.json(products);
     } catch (error) {
       next(error);
@@ -37,7 +37,10 @@ export class ProductController {
         return next(new AppError("Product ID is required", 400));
       }
 
-      const product = await productService.getProductById(id);
+      const product = await productService.getProductById(
+        id,
+        (req as any).userId
+      );
 
       if (!product) {
         return next(new AppError("Product not found", 404));
@@ -65,7 +68,10 @@ export class ProductController {
         description: validatedData.description ?? null,
       };
 
-      const newProduct = await productService.createProduct(productData);
+      const newProduct = await productService.createProduct(
+        productData,
+        (req as any).userId
+      );
       res.status(201).json(newProduct);
     } catch (error) {
       next(error);
@@ -94,7 +100,8 @@ export class ProductController {
 
       const updatedProduct = await productService.updateProduct(
         id,
-        updateData as Partial<Omit<Product, "id" | "createdAt" | "updatedAt">>
+        updateData as Partial<Omit<Product, "id" | "createdAt" | "updatedAt">>,
+        (req as any).userId
       );
 
       if (!updatedProduct) {
@@ -120,7 +127,10 @@ export class ProductController {
         return next(new AppError("Product ID is required", 400));
       }
 
-      const deleted = await productService.deleteProduct(id);
+      const deleted = await productService.deleteProduct(
+        id,
+        (req as any).userId
+      );
 
       if (!deleted) {
         return next(new AppError("Product not found", 404));

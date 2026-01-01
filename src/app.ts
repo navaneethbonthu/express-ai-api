@@ -13,8 +13,9 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK" });
 });
 
+// This MUST be the last middleware
+app.use(globalErrorHandler);
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
-// This MUST be the last middleware
-app.use(globalErrorHandler);
