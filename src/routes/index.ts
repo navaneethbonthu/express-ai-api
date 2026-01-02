@@ -3,6 +3,7 @@ import productRoutes from "./product.routes.js";
 import userRoutes from "./user.routes.js";
 import authRoutes from "./auth.routes.ts";
 import { protect } from "middlewares/auth.middleware.ts";
+import orderRoutes from "./order.routes.ts";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use(protect);
 // These are now secure by default.
 router.use("/products", productRoutes);
 router.use("/users", userRoutes);
+router.use("/orders", orderRoutes);
 
 export default router;

@@ -11,14 +11,10 @@ const productService = new ProductService();
 
 export class ProductController {
   // 1. Get All Products
-  async getAllProducts(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async getAllProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await productService.getAllProducts((req as any).userId);
-      res.json(products);
+      const data = await productService.getAllProducts(req.query);
+      res.json(data);
     } catch (error) {
       next(error);
     }
