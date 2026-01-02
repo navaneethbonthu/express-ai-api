@@ -48,14 +48,7 @@ export class AuthController {
 
   async getMe(req: any, res: Response, next: NextFunction) {
     try {
-      // req.userId was added by your 'protect' middleware!
-      const user = await prisma.user.findUnique({
-        where: { id: req.userId },
-        select: { id: true, email: true, name: true, createdAt: true },
-      });
-
-      if (!user) return next(new AppError("User not found", 404));
-
+      const user = await authService.getMe(req.userId);
       res.json(user);
     } catch (error) {
       next(error);
