@@ -37,10 +37,7 @@ export class ProductController {
         return next(new AppError("Product ID is required", 400));
       }
 
-      const product = await productService.getProductById(
-        id,
-        (req as any).userId
-      );
+      const product = await productService.getProductById(id);
 
       if (!product) {
         return next(new AppError("Product not found", 404));
@@ -115,27 +112,13 @@ export class ProductController {
   }
 
   // 5. Delete Product
-  async deleteProduct(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async deleteProduct(req: any, res: Response, next: NextFunction) {
     try {
-      const id = req.params.id;
+      const product = await productService.getProductById(req.params.id);
 
-      if (!id) {
-        return next(new AppError("Product ID is required", 400));
-      }
+      if (!product) return next(new AppError("Product not found", 404));
 
-      const deleted = await productService.deleteProduct(
-        id,
-        (req as any).userId
-      );
-
-      if (!deleted) {
-        return next(new AppError("Product not found", 404));
-      }
-
+      await productService.deleteProduct(req.params.id);
       res.status(204).send();
     } catch (error) {
       next(error);

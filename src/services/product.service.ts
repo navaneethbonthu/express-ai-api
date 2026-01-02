@@ -8,11 +8,11 @@ export class ProductService {
     });
   }
 
-  async getProductById(id: string, userId: string): Promise<Product | null> {
+  async getProductById(id: string): Promise<Product | null> {
     const product = await prisma.product.findUnique({
       where: { id },
     });
-    if (product && product.userId === userId) {
+    if (product) {
       return product;
     }
     return null;
@@ -46,9 +46,9 @@ export class ProductService {
     }
   }
 
-  async deleteProduct(id: string, userId: string): Promise<boolean> {
+  async deleteProduct(id: string): Promise<boolean> {
     const existing = await prisma.product.findUnique({ where: { id } });
-    if (!existing || existing.userId !== userId) {
+    if (!existing ) {
       return false;
     }
     try {

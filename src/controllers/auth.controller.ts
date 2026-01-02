@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AuthService } from "@controllers/../services/auth.service.js";
 import { signupSchema, loginSchema } from "../validations/auth.validation.js";
 import { AppError } from "../utils/app-error.js";
+import { prisma } from "lib/prisma.ts";
 
 const authService = new AuthService();
 
@@ -16,7 +17,8 @@ export class AuthController {
       if (error instanceof z.ZodError) {
         return next(
           new AppError(
-            "Validation failed: " + error.issues.map((issue) => issue.message).join(", "),
+            "Validation failed: " +
+              error.issues.map((issue) => issue.message).join(", "),
             400
           )
         );
@@ -34,7 +36,8 @@ export class AuthController {
       if (error instanceof z.ZodError) {
         return next(
           new AppError(
-            "Validation failed: " + error.issues.map((issue) => issue.message).join(", "),
+            "Validation failed: " +
+              error.issues.map((issue) => issue.message).join(", "),
             400
           )
         );
@@ -45,8 +48,14 @@ export class AuthController {
 
   async getMe(req: any, res: Response, next: NextFunction) {
     try {
-      const user = await authService.getUserById(req.userId);
+      // req.userId was added by your 'protect' middleware!
+      const user = await prisma.user.findUnique({
+        where: { id: req.userId },
+        select: { id: true, email: true, name: true, createdAt: true },
+      });
+
       if (!user) return next(new AppError("User not found", 404));
+
       res.json(user);
     } catch (error) {
       next(error);
