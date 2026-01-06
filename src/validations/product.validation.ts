@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createProductSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  price: z.number().positive("Price must be positive"),
+  price: z.coerce.number().positive("Price must be a positive number"),
   description: z.string().optional(),
   categoryId: z.string(),
 });
