@@ -15,6 +15,7 @@ app.get("/health", (req, res) => {
 
 // This MUST be the last middleware
 app.use(globalErrorHandler);
+app.use("/uploads", express.static("uploads"));
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

@@ -10,6 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  products  Product[] // One category can have many products
+  createdAt DateTime  @default(now())
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -17,6 +25,8 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+
 
   // Relationships
   products  Product[] // Products created/owned by this user
@@ -32,6 +42,13 @@ model Product {
   // Ownership Relationship
   userId      String   // The ID of the user who created/owns this product
   user        User     @relation(fields: [userId], references: [id])
+
+
+    // Link to Category
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+   imageUrl    String?  // Add this field (Optional)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

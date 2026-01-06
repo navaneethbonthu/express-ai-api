@@ -55,11 +55,14 @@ export class ProductController {
       // .parse() throws a ZodError if validation fails.
       // The catch block will send it to globalErrorHandler via next(error)
       const validatedData = createProductSchema.parse(req.body);
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
       const productData = {
         ...validatedData,
         description: validatedData.description ?? null,
-      };
+        categoryId: validatedData.categoryId,
+        imageUrl, // Save the path to DB
+      }; // Cast as any to satisfy the complex Omit type and let runtime handle it
 
       const newProduct = await productService.createProduct(
         productData,
@@ -93,7 +96,12 @@ export class ProductController {
 
       const updatedProduct = await productService.updateProduct(
         id,
-        updateData as Partial<Omit<Product, "id" | "createdAt" | "updatedAt">>,
+        updateData as Partial<
+          Omit<
+            Product,
+            "id" | "createdAt" | "updatedAt" | "userId" | "categoryId"
+          >
+        >,
         (req as any).userId
       );
 

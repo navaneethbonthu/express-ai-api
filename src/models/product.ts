@@ -3,6 +3,9 @@ export interface Product {
   name: string;
   price: number;
   description: string | null;
+  imageUrl: string | null;
+  userId: string;
+  categoryId: string;
   createdAt: Date;
   updatedAt: Date;
 }

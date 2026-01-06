@@ -4,6 +4,7 @@ import userRoutes from "./user.routes.js";
 import authRoutes from "./auth.routes.ts";
 import { protect } from "middlewares/auth.middleware.ts";
 import orderRoutes from "./order.routes.ts";
+import categoryRoutes from "./category.routes.ts";
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use(protect);
 router.use("/products", productRoutes);
 router.use("/users", userRoutes);
 router.use("/orders", orderRoutes);
+router.use("/categories", categoryRoutes);
 
 export default router;

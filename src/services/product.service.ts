@@ -11,6 +11,7 @@ export class ProductService {
     const search = query.search as string;
     const minPrice = query.minPrice ? Number(query.minPrice) : undefined;
     const maxPrice = query.maxPrice ? Number(query.maxPrice) : undefined;
+    const categoryId = query.categoryId as string;
 
     // 2. Build the "Where" clause (Filtering Logic)
     const whereCondition: any = {
@@ -24,6 +25,7 @@ export class ProductService {
               ],
             }
           : {},
+        categoryId ? { categoryId } : {},
         // Price Filtering
         minPrice !== undefined ? { price: { gte: minPrice } } : {},
         maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
@@ -69,7 +71,10 @@ export class ProductService {
   }
 
   async createProduct(
-    product: Omit<Product, "id" | "createdAt" | "updatedAt">,
+    product: Omit<
+      Product,
+      "id" | "createdAt" | "updatedAt" | "userId" | "categoryId"
+    > & { categoryId: string },
     userId: string
   ): Promise<Product> {
     return prisma.product.create({
@@ -79,7 +84,9 @@ export class ProductService {
 
   async updateProduct(
     id: string,
-    product: Partial<Omit<Product, "id" | "createdAt" | "updatedAt">>,
+    product: Partial<
+      Omit<Product, "id" | "createdAt" | "updatedAt" | "userId" | "categoryId">
+    > & { categoryId?: string },
     userId: string
   ): Promise<Product | null> {
     const existing = await prisma.product.findUnique({ where: { id } });
