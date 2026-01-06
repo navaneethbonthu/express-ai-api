@@ -1,4 +1,4 @@
-import { Product } from "../models/product.js";
+import { Product } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
 export class ProductService {
