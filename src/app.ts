@@ -1,6 +1,7 @@
 import express from "express";
 import routes from "./routes/index.js";
 import { globalErrorHandler } from "middlewares/error.middleware.js";
+import cors from "cors";
 
 const app = express();
 const port = 3000;
@@ -16,11 +17,14 @@ app.get("/health", (req, res) => {
 // This MUST be the last middleware
 app.use(globalErrorHandler);
 app.use("/uploads", express.static("uploads"));
-app.use(cors());
+
+app.use(
+  cors({
+    origin: "*", // or your frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
-function cors(): any {
-  throw new Error("Function not implemented.");
-}
