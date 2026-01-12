@@ -71,36 +71,48 @@ export class ProductService {
   }
 
   async createProduct(
-    product: Omit<
-      Product,
-      "id" | "createdAt" | "updatedAt" | "userId" | "categoryId"
-    > & { categoryId: string },
+    productData: Omit<Product, "id" | "createdAt" | "updatedAt">,
     userId: string
   ): Promise<Product> {
+    const { categoryId, ...rest } = productData;
+    // Check if category exists
+    const categoryExists = await prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+    if (!categoryExists) {
+      throw new Error("Category not found");
+    }
+
     return prisma.product.create({
-      data: { ...product, userId },
+      data: { ...rest, userId, categoryId },
     });
   }
 
   async updateProduct(
     id: string,
-    product: Partial<
-      Omit<Product, "id" | "createdAt" | "updatedAt" | "userId" | "categoryId">
-    > & { categoryId?: string },
+    productData: Partial<
+      Omit<Product, "id" | "createdAt" | "updatedAt" | "userId">
+    >,
     userId: string
   ): Promise<Product | null> {
-    const existing = await prisma.product.findUnique({ where: { id } });
-    if (!existing || existing.userId !== userId) {
-      return null;
+    const existingProduct = await prisma.product.findUnique({ where: { id } });
+    if (!existingProduct || existingProduct.userId !== userId) {
+      return null; // Product not found or not owned by the user
     }
-    try {
-      return await prisma.product.update({
-        where: { id },
-        data: product,
+
+    if (productData.categoryId) {
+      const categoryExists = await prisma.category.findUnique({
+        where: { id: productData.categoryId },
       });
-    } catch (error) {
-      return null;
+      if (!categoryExists) {
+        throw new Error("Category not found");
+      }
     }
+
+    return prisma.product.update({
+      where: { id },
+      data: productData,
+    });
   }
 
   async deleteProduct(id: string): Promise<boolean> {
