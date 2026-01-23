@@ -11,6 +11,11 @@ datasource db {
 }
 
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model Category {
   id        String    @id @default(cuid())
   name      String    @unique
@@ -23,6 +28,7 @@ model User {
   name      String
   email     String   @unique
   password  String
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

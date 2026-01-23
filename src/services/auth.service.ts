@@ -3,13 +3,16 @@ import bcrypt from "bcryptjs";
 import { UserWithoutPassword } from "@models/user.model.js";
 import { AppError } from "../utils/app-error.js";
 import { prisma } from "../lib/prisma.js";
-
+import { Role } from "@prisma/client";
+import { SignupInput } from "validations/auth.validation.ts";
 const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-key";
 
 export class AuthService {
   // 1. Generate Token
-  private generateToken(userId: string): string {
-    return jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "1d" });
+  private generateToken(userId: string, role: string): string {
+    return jwt.sign({ id: userId, role: role }, JWT_SECRET, {
+      expiresIn: "1d",
+    });
   }
 
   private removePassword(user: any): UserWithoutPassword {
@@ -18,7 +21,7 @@ export class AuthService {
   }
 
   // 2. Signup
-  async signup(data: { email: string; password: string; name: string }) {
+  async signup(data: SignupInput) {
     // 1. Check for existing user
     const existingUser = await prisma.user.findUnique({
       where: { email: data.email },
@@ -37,20 +40,22 @@ export class AuthService {
         email: data.email,
         password: hashedPassword,
         name: data.name,
+        role: data.role as Role,
       },
       // Optional: specifically select fields to return to avoid getting large arrays back
       select: {
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
         updatedAt: true,
         // We skip 'password', 'orders', and 'products' here
       },
     });
-
+    console.log(newUser);
     // 4. Generate Token
-    const token = this.generateToken(newUser.id);
+    const token = this.generateToken(newUser.id, newUser.role);
 
     // 5. Return (Note: since we used 'select' above, we don't even need removePassword!)
     return { user: newUser, token };
@@ -66,7 +71,7 @@ export class AuthService {
       throw new AppError("Invalid email or password", 401);
     }
 
-    const token = this.generateToken(user.id);
+    const token = this.generateToken(user.id, user.role);
     return { user: this.removePassword(user), token };
   }
 

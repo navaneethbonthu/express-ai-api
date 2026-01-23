@@ -30,7 +30,7 @@ export class ProductService {
         // Price Filtering
         minPrice !== undefined ? { price: { gte: minPrice } } : {},
         maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
-        { userId }, // Restrict to user's products
+        { userId }, // Restrict to user's productsx
       ],
     };
 

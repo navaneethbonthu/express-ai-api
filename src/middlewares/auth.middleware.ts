@@ -24,3 +24,15 @@ export const protect = async (req: any, res: Response, next: NextFunction) => {
     next(new AppError("Invalid token", 401));
   }
 };
+
+export const restrictTo = (...roles: string[]) => {
+  return (req: any, res: any, next: any) => {
+    // req.user was set by your previous 'protect' middleware
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "You do not have permission to perform this action",
+      });
+    }
+    next();
+  };
+};
