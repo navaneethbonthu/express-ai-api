@@ -14,7 +14,7 @@ export class OrderService {
       data: {
         userId, // The Buyer
         productId, // The Item
-        quantity,
+        quantity, 
         totalPrice: product.price * quantity,
         status: "pending",
       },

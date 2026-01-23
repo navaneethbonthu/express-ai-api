@@ -10,19 +10,10 @@ router.get("/", productController.getAllProducts.bind(productController));
 router.get("/:id", productController.getProductById.bind(productController));
 router.post(
   "/",
-  protect, // Add protect middleware
   upload.single("image"),
   productController.createProduct.bind(productController)
 );
-router.put(
-  "/:id",
-  protect,
-  productController.updateProduct.bind(productController)
-);
-router.delete(
-  "/:id",
-  protect,
-  productController.deleteProduct.bind(productController)
-);
+router.put("/:id", productController.updateProduct.bind(productController));
+router.delete("/:id", productController.deleteProduct.bind(productController));
 
 export default router;

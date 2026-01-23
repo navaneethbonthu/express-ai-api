@@ -5,15 +5,15 @@ import {
   createProductSchema,
   updateProductSchema,
 } from "../validations/product.validation.js";
-import { Product } from "@prisma/client/wasm";
+import { Product } from "@prisma/client";
 
 const productService = new ProductService();
 
 export class ProductController {
   // 1. Get All Products
-  async getAllProducts(req: Request, res: Response, next: NextFunction) {
+  async getAllProducts(req: any, res: Response, next: NextFunction) {
     try {
-      const data = await productService.getAllProducts(req.query);
+      const data = await productService.getAllProducts(req.query, req.userId);
       res.json(data);
     } catch (error) {
       next(error);
@@ -22,23 +22,19 @@ export class ProductController {
 
   // 2. Get Product By ID
   async getProductById(
-    req: Request,
+    req: any,
     res: Response,
     next: NextFunction
   ): Promise<void> {
     try {
       const id = req.params.id;
+      const userId = req.userId;
 
       if (!id) {
         return next(new AppError("Product ID is required", 400));
       }
 
-      const product = await productService.getProductById(id);
-
-      if (!product) {
-        return next(new AppError("Product not found", 404));
-      }
-
+      const product = await productService.getProductById(id, userId);
       res.json(product);
     } catch (error) {
       next(error);
@@ -105,10 +101,6 @@ export class ProductController {
         (req as any).userId
       );
 
-      if (!updatedProduct) {
-        return next(new AppError("Product not found", 404));
-      }
-
       res.json(updatedProduct);
     } catch (error) {
       next(error);
@@ -118,11 +110,14 @@ export class ProductController {
   // 5. Delete Product
   async deleteProduct(req: any, res: Response, next: NextFunction) {
     try {
-      const product = await productService.getProductById(req.params.id);
+      const id = req.params.id;
+      const userId = req.userId; // Provided by protect middleware
 
-      if (!product) return next(new AppError("Product not found", 404));
+      if (!id) {
+        return next(new AppError("Product ID is required", 400));
+      }
 
-      await productService.deleteProduct(req.params.id);
+      await productService.deleteProduct(id, userId);
       res.status(204).send();
     } catch (error) {
       next(error);

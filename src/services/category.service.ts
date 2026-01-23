@@ -23,6 +23,12 @@ export class CategoryService {
     });
   }
 
+  getCategoryIdByname(name: string) {
+    return prisma.category.findUnique({
+      where: { name },
+      select: { id: true },
+    });
+  }
   async createCategory(name: string) {
     return await prisma.category.create({
       data: { name },

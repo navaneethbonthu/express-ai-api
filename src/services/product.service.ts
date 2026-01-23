@@ -1,8 +1,9 @@
 import { Product } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
+import { AppError } from "../utils/app-error.js";
 
 export class ProductService {
-  async getAllProducts(query: any) {
+  async getAllProducts(query: any, userId: string) {
     // 1. Extract Query Parameters with default values
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
@@ -29,6 +30,7 @@ export class ProductService {
         // Price Filtering
         minPrice !== undefined ? { price: { gte: minPrice } } : {},
         maxPrice !== undefined ? { price: { lte: maxPrice } } : {},
+        { userId }, // Restrict to user's products
       ],
     };
 
@@ -42,6 +44,9 @@ export class ProductService {
         include: {
           user: {
             select: { name: true, email: true }, // See who owns the product
+          },
+          category: {
+            select: { name: true }, // Include category details
           },
         },
       }),
@@ -60,19 +65,28 @@ export class ProductService {
     };
   }
 
-  async getProductById(id: string): Promise<Product | null> {
+  async getProductById(id: string, userId: string): Promise<Product | null> {
     const product = await prisma.product.findUnique({
       where: { id },
     });
-    if (product) {
-      return product;
+
+    if (!product) {
+      throw new AppError("Product not found", 404);
     }
-    return null;
+
+    if (product.userId !== userId) {
+      throw new AppError(
+        "You do not have permission to view this product",
+        403,
+      );
+    }
+
+    return product;
   }
 
   async createProduct(
-    productData: Omit<Product, "id" | "createdAt" | "updatedAt">,
-    userId: string
+    productData: Omit<Product, "id" | "createdAt" | "updatedAt" | "userId">,
+    userId: string,
   ): Promise<Product> {
     const { categoryId, ...rest } = productData;
     // Check if category exists
@@ -93,11 +107,17 @@ export class ProductService {
     productData: Partial<
       Omit<Product, "id" | "createdAt" | "updatedAt" | "userId">
     >,
-    userId: string
+    userId: string,
   ): Promise<Product | null> {
     const existingProduct = await prisma.product.findUnique({ where: { id } });
-    if (!existingProduct || existingProduct.userId !== userId) {
-      return null; // Product not found or not owned by the user
+    if (!existingProduct) {
+      throw new AppError("Product not found", 404);
+    }
+    if (existingProduct.userId !== userId) {
+      throw new AppError(
+        "You do not have permission to update this product",
+        403,
+      );
     }
 
     if (productData.categoryId) {
@@ -115,18 +135,26 @@ export class ProductService {
     });
   }
 
-  async deleteProduct(id: string): Promise<boolean> {
+  async deleteProduct(id: string, userId: string): Promise<boolean> {
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) {
-      return false;
+      throw new AppError("Product not found", 404);
     }
+
+    if (existing.userId !== userId) {
+      throw new AppError(
+        "You do not have permission to delete this product",
+        403,
+      );
+    }
+
     try {
       await prisma.product.delete({
         where: { id },
       });
       return true;
     } catch (error) {
-      return false;
+      throw new AppError("Failed to delete product", 500);
     }
   }
 }

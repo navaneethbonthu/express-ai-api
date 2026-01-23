@@ -7,10 +7,12 @@ const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(cors({
-  origin: '*', // Allow your Angular app
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: "*", // Allow your Angular app
+    credentials: true,
+  }),
+);
 
 app.use("/api", routes);
 
@@ -21,7 +23,6 @@ app.get("/health", (req, res) => {
 // This MUST be the last middleware
 app.use(globalErrorHandler);
 app.use("/uploads", express.static("uploads"));
-
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
